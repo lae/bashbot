@@ -42,21 +42,16 @@ startup() {
 }
 
 quit() {
+  echo -e "\nQuitting..."
   kill -6 $nc_pid 2>&1>/dev/null
   #remove file descriptor
   exec 3>&-
   rm -f $f
-  return $?
-}
-
-close() {
-  echo -e "\nClosing..."
-  quit
   exit $?
 }
 
 # trap interrupt
-trap close SIGINT
+trap quit SIGINT
 
 startup
 

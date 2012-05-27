@@ -24,10 +24,36 @@ else
   nick=$2
 fi
 
-#set up file descriptor
-f=/tmp/irc.$(date +%s)
-exec 3>$f
+startup() {
+  #set up file descriptor
+  f=/tmp/irc.$(date +%s)
+  exec 3>$f
+  echo -e "NICK $nick\nUSER $nick $nick $server :bashbot by musee" >&3
+  #open connection to irc
+  tail -f $f | nc $server $port &
+  nc_pid=$!
+}
 
-#remove file descriptor
-exec 3>&-
-rm -f $f
+quit() {
+  kill -6 $nc_pid 2>&1>/dev/null
+  #remove file descriptor
+  exec 3>&-
+  rm -f $f
+  return $?
+}
+
+close() {
+  echo -e "\nClosing..."
+  quit
+  exit $?
+}
+
+# trap interrupt
+trap close SIGINT
+
+startup
+
+while read
+do
+  echo $REPLY >&3
+done

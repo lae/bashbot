@@ -1,5 +1,12 @@
 #!/bin/bash
 
+#check for our primary dependency lol
+which nc 2>&1>/dev/null
+if [ $? -eq 1 ]; then
+  echo "Could not locate netcat."
+  exit 1
+fi
+
 if [ -z $1 ]; then
   read -p "Where are you wanting to connect? " s
 else
@@ -8,7 +15,7 @@ fi
 
 if [ -z $(echo $s | grep -P "^(([A-Za-z0-9]+\.)+[A-Za-z]+|([0-9]{1,3}\.){3}[0-9]{1,3})(:[0-9]+)?$") ]; then
   echo "Are you sure this is a valid server name/IP ($s)?"
-  exit
+  exit 1
 elif [ -z $(echo $s | grep -P "(:[0-9]+)$") ]; then
   server=$s
   port=6667
